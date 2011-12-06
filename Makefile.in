@@ -34,9 +34,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = .
-DIST_COMMON = README $(am__configure_deps) $(dist_bin_SCRIPTS) \
-	$(dist_doc_DATA) $(dist_man_MANS) $(dist_pm_DATA) \
-	$(dist_pmstow_DATA) $(srcdir)/Makefile.am \
+DIST_COMMON = README $(am__configure_deps) $(dist_doc_DATA) \
+	$(dist_man_MANS) $(dist_pmstow_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/doc/stamp-vti \
 	$(srcdir)/doc/version.texi $(top_srcdir)/configure AUTHORS \
 	COPYING ChangeLog INSTALL NEWS THANKS TODO automake/install-sh \
@@ -73,8 +72,8 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(man8dir)" "$(DESTDIR)$(docdir)" \
-	"$(DESTDIR)$(pmdir)" "$(DESTDIR)$(pmstowdir)"
-SCRIPTS = $(dist_bin_SCRIPTS)
+	"$(DESTDIR)$(pmstowdir)" "$(DESTDIR)$(pmdir)"
+SCRIPTS = $(bin_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -92,7 +91,7 @@ DVIPS = dvips
 man8dir = $(mandir)/man8
 NROFF = nroff
 MANS = $(dist_man_MANS)
-DATA = $(dist_doc_DATA) $(dist_pm_DATA) $(dist_pmstow_DATA)
+DATA = $(dist_doc_DATA) $(dist_pmstow_DATA) $(pm_DATA)
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -125,7 +124,6 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
-MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 PACKAGE = @PACKAGE@
@@ -137,6 +135,7 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
+PMDIR = @PMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -180,16 +179,18 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_bin_SCRIPTS = bin/stow bin/chkstow
+bin_SCRIPTS = bin/stow bin/chkstow
 info_TEXINFOS = doc/stow.texi
 dist_man_MANS = doc/stow.8
+PDF = doc/manual.pdf
+HTML = doc/manual-single.html
 dist_doc_DATA = \
 	README \
-	doc/manual.pdf doc/manual-single.html doc/version.texi \
+	$(PDF) $(HTML) doc/version.texi \
 	ChangeLog doc/ChangeLog.OLD
 
-pmdir = $(libdir)/perl5
-dist_pm_DATA = lib/Stow.pm
+pmdir = $(PMDIR)
+pm_DATA = lib/Stow.pm
 pmstowdir = $(pmdir)/Stow
 dist_pmstow_DATA = lib/Stow/Util.pm
 TEXINFO_TEX = doc/texinfo.tex
@@ -208,7 +209,7 @@ doc_deps = $(info_TEXINFOS) doc/version.texi
 DEFAULT_IGNORE_LIST = $(srcdir)/default-ignore-list
 TESTS_DIR = $(srcdir)/t
 TESTS_OUT = tmp-testing-trees
-TESTS_ENVIRONMENT = $(PERL) -I$(srcdir)/bin -I$(srcdir)/lib -I$(TESTS_DIR)
+TESTS_ENVIRONMENT = $(PERL) -Ibin -Ilib -I$(TESTS_DIR)
 
 # This is a kind of hack; TESTS needs to be set to ensure that the
 # `check-am' target makes check-TESTS, but we override check-TESTS
@@ -227,7 +228,7 @@ EXTRA_DIST = \
 	$(DEFAULT_IGNORE_LIST) \
 	$(CPAN_FILES)
 
-CLEANFILES = $(bin_SCRIPTS) $(dist_pm_DATA)
+CLEANFILES = $(bin_SCRIPTS) $(pm_DATA) $(dist_man_MANS) $(HTML) $(PDF) ChangeLog
 
 # this is more explicit and reliable than the config file trick
 edit = sed -e 's|[@]PERL[@]|$(PERL)|g' \
@@ -239,7 +240,7 @@ all: all-am
 .SUFFIXES: .dvi .ps
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -266,15 +267,15 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 
-$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	$(am__cd) $(srcdir) && $(AUTOCONF)
-$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
+install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
-	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
+	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
@@ -297,9 +298,9 @@ install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	     } \
 	; done
 
-uninstall-dist_binSCRIPTS:
+uninstall-binSCRIPTS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
+	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
 	files=`for p in $$list; do echo "$$p"; done | \
 	       sed -e 's,.*/,,;$(transform)'`; \
 	test -n "$$list" || exit 0; \
@@ -354,7 +355,7 @@ doc/stow.html: doc/stow.texi $(srcdir)/doc/version.texi doc/$(am__dirstamp)
 	    rm -rf $(@:.html=); else rm -Rf $(@:.html=.htp) $@; fi; \
 	  exit 1; \
 	fi
-$(srcdir)/doc/version.texi: @MAINTAINER_MODE_TRUE@ $(srcdir)/doc/stamp-vti
+$(srcdir)/doc/version.texi:  $(srcdir)/doc/stamp-vti
 $(srcdir)/doc/stamp-vti: doc/stow.texi $(top_srcdir)/configure
 	test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
 	@(dir=.; test -f ./doc/stow.texi || dir=$(srcdir); \
@@ -373,7 +374,7 @@ mostlyclean-vti:
 	-rm -f vti.tmp
 
 maintainer-clean-vti:
-@MAINTAINER_MODE_TRUE@	-rm -f $(srcdir)/doc/stamp-vti $(srcdir)/doc/version.texi
+	-rm -f $(srcdir)/doc/stamp-vti $(srcdir)/doc/version.texi
 .dvi.ps:
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	$(DVIPS) -o $@ $<
@@ -529,26 +530,6 @@ uninstall-dist_docDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(docdir)" && rm -f $$files
-install-dist_pmDATA: $(dist_pm_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pmdir)" || $(MKDIR_P) "$(DESTDIR)$(pmdir)"
-	@list='$(dist_pm_DATA)'; test -n "$(pmdir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pmdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pmdir)" || exit $$?; \
-	done
-
-uninstall-dist_pmDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_pm_DATA)'; test -n "$(pmdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(pmdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(pmdir)" && rm -f $$files
 install-dist_pmstowDATA: $(dist_pmstow_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pmstowdir)" || $(MKDIR_P) "$(DESTDIR)$(pmstowdir)"
@@ -569,6 +550,26 @@ uninstall-dist_pmstowDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(pmstowdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(pmstowdir)" && rm -f $$files
+install-pmDATA: $(pm_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pmdir)" || $(MKDIR_P) "$(DESTDIR)$(pmdir)"
+	@list='$(pm_DATA)'; test -n "$(pmdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pmdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pmdir)" || exit $$?; \
+	done
+
+uninstall-pmDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pm_DATA)'; test -n "$(pmdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(pmdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(pmdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -745,7 +746,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(INFO_DEPS) $(SCRIPTS) $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man8dir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(pmdir)" "$(DESTDIR)$(pmstowdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man8dir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(pmstowdir)" "$(DESTDIR)$(pmdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -796,8 +797,8 @@ info: info-am
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-dist_docDATA install-dist_pmDATA \
-	install-dist_pmstowDATA install-info-am install-man
+install-data-am: install-dist_docDATA install-dist_pmstowDATA \
+	install-info-am install-man install-pmDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 install-dvi: install-dvi-am
@@ -814,7 +815,7 @@ install-dvi-am: $(DVIS)
 	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dvidir)'"; \
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dvidir)" || exit $$?; \
 	done
-install-exec-am: install-dist_binSCRIPTS
+install-exec-am: install-binSCRIPTS
 
 install-html: install-html-am
 
@@ -902,10 +903,6 @@ install-ps-am: $(PSS)
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(psdir)" || exit $$?; done
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
-	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-aminfo \
 	maintainer-clean-generic maintainer-clean-vti
 
@@ -921,10 +918,10 @@ ps: ps-am
 
 ps-am: $(PSS)
 
-uninstall-am: uninstall-dist_binSCRIPTS uninstall-dist_docDATA \
-	uninstall-dist_pmDATA uninstall-dist_pmstowDATA \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-man uninstall-pdf-am uninstall-ps-am
+uninstall-am: uninstall-binSCRIPTS uninstall-dist_docDATA \
+	uninstall-dist_pmstowDATA uninstall-dvi-am uninstall-html-am \
+	uninstall-info-am uninstall-man uninstall-pdf-am \
+	uninstall-pmDATA uninstall-ps-am
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 uninstall-man: uninstall-man8
@@ -937,22 +934,21 @@ uninstall-man: uninstall-man8
 	dist-tarZ dist-xz dist-zip distcheck distclean \
 	distclean-generic distcleancheck distdir distuninstallcheck \
 	dvi dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-data-hook \
-	install-dist_binSCRIPTS install-dist_docDATA \
-	install-dist_pmDATA install-dist_pmstowDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-man8 install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-aminfo \
-	maintainer-clean-generic maintainer-clean-vti mostlyclean \
-	mostlyclean-aminfo mostlyclean-generic mostlyclean-vti pdf \
-	pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_binSCRIPTS uninstall-dist_docDATA \
-	uninstall-dist_pmDATA uninstall-dist_pmstowDATA \
+	install-binSCRIPTS install-data install-data-am \
+	install-data-hook install-dist_docDATA install-dist_pmstowDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-man8 install-pdf install-pdf-am \
+	install-pmDATA install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-aminfo maintainer-clean-generic \
+	maintainer-clean-vti mostlyclean mostlyclean-aminfo \
+	mostlyclean-generic mostlyclean-vti pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-binSCRIPTS \
+	uninstall-dist_docDATA uninstall-dist_pmstowDATA \
 	uninstall-dvi-am uninstall-hook uninstall-html-am \
 	uninstall-info-am uninstall-man uninstall-man8 \
-	uninstall-pdf-am uninstall-ps-am
+	uninstall-pdf-am uninstall-pmDATA uninstall-ps-am
 
 export TEXI2DVI_BUILD_MODE = clean
 
@@ -985,9 +981,9 @@ $(TESTS_OUT):
 
 # clean up auto-generated files
 clean-local:
-	-rm -rf $(TESTS_OUT) \
-		bin/stow bin/chkstow doc/stow.8 ChangeLog \
-		doc/manual-split doc/manual-single.html doc/manual.pdf
+	-rm -rf $(TESTS_OUT)
+maintainer-clean:
+	-rm -rf doc/manual-split
 
 bin/stow: bin/stow.in Makefile
 	[ -d bin ] || mkdir bin # required in vpath mode
@@ -1007,7 +1003,7 @@ lib/Stow.pm: lib/Stow.pm.in Makefile $(DEFAULT_IGNORE_LIST)
 # The below rules should only be needed by developers.
 ##############################################################################
 
-doc/stow.8: bin/stow Makefile
+doc/stow.8: bin/stow.in
 	[ -d doc ] || mkdir doc # required in vpath mode
 	pod2man $< > $@
 
@@ -1027,12 +1023,12 @@ doc/stow.8: bin/stow Makefile
 # install.  Instead, by overriding the built-in rules with modified
 # versions, we can kill both birds with one stone.
 
-doc/manual-single.html: $(doc_deps)
+$(HTML): $(doc_deps)
 	[ -d doc ] || mkdir doc # required in vpath mode
 	-rm -f $@
 	texi2html --P=$(srcdir) --output=$@ -expandinfo -menu -monolithic -verbose $<
 
-doc/manual.pdf: $(doc_deps)
+$(PDF): $(doc_deps)
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc' \
 	$(TEXI2PDF) -o $@ `test -f 'doc/stow.texi' || echo '$(srcdir)/'`doc/stow.texi
@@ -1068,13 +1064,15 @@ uninstall-hook:
 # rebuilt during development by a simple `make'.  A workaround hack
 # for this is to piggy-back the dependency onto manual-single.html,
 # which *is* automatically rebuilt by `make':
-doc/manual-single.html: doc/manual-split
+$(HTML): doc/manual-split
 
 # With the above hack, this probably isn't necessary but is safer to
 # keep in anyway:
 dist-hook: doc/manual-split
 
-ChangeLog: doc/ChangeLog.OLD Makefile
+dist-hook: $(dist_man_MANS) ChangeLog
+
+ChangeLog: doc/ChangeLog.OLD
 	@if [ -d .git ]; then \
 	    ( \
 	        git log \
@@ -1084,6 +1082,7 @@ ChangeLog: doc/ChangeLog.OLD Makefile
                 | sed 's/^\([A-Z]\)\t/      \1 /'; \
 	        cat $< \
 	    ) > $@; \
+	    echo "Rebuilt $@ from git commit history."; \
 	else \
 	    echo "Not in a git repository; can't update ChangeLog."; \
 	fi

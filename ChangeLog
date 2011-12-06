@@ -1,7 +1,173 @@
+Tue Dec 6 10:35:31 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Bump version to 2.1.1
+
+      M META.json
+      M META.yml
+      M configure.ac
+
+Tue Dec 6 17:33:41 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Ignore .mrdownload files from my `download' plugin to Joey Hess' mr
+    utility.
+
+      M MANIFEST.SKIP
+
+Tue Dec 6 17:30:58 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add a workaround for not being able to ensure that git commit
+    triggers ChangeLog update.
+
+      M doc/HOWTO-RELEASE
+
+Tue Dec 6 17:24:44 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Show when ChangeLog is rebuilt.
+
+      M Makefile.am
+
+Tue Dec 6 17:22:21 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix release instructions regarding CPAN distribution.
+
+      M doc/HOWTO-RELEASE
+
+Tue Dec 6 17:08:21 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Refill paragraph in README.
+
+      M README
+
+Tue Dec 6 17:08:13 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Don't duplicate information from INSTALL.
+
+      M README
+
+Tue Dec 6 17:07:29 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Document installation via Module::Build.
+
+      M INSTALL
+
+Tue Dec 6 17:06:59 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Document prerequisites for installation.
+
+      M INSTALL
+
+Tue Dec 6 17:04:50 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * chkstow was missing from Module::Build install.
+
+      M Build.PL
+
+Tue Dec 6 17:04:37 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * File::Slurp is no longer used.
+
+      M Build.PL
+      M META.json
+      M META.yml
+
+Tue Dec 6 16:20:52 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix automake issues (thanks to Stefano Lattarini for spotting these!)
+
+      M Build.PL
+      M Makefile.am
+      M NEWS
+      M THANKS
+
+Tue Dec 6 16:47:32 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add $(PDF) and $(HTML) variables.
+
+      M Makefile.am
+
+Tue Dec 6 16:39:57 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add *.orig to MANIFEST.SKIP.
+
+      M MANIFEST.SKIP
+
+Tue Dec 6 15:57:36 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Ditch deprecated AM_MAINTAINER_MODE.
+
+      M aclocal.m4
+      M configure.ac
+
+Tue Dec 6 15:56:43 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add licensing changes to TODO.
+
+      M TODO
+
+Tue Dec 6 15:41:33 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add bug-reporting email address and a couple of URLs to usage text to
+    comply with GNU Coding Standards for --help option.
+
+      M bin/stow.in
+
+Tue Dec 6 15:57:20 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Calculated the correct default value for pmdir based on the local
+    Perl installation.
+
+      M NEWS
+      M configure.ac
+
+Tue Dec 6 10:33:34 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fixed bug where --with-pmdir was ineffectual.
+
+      M Makefile.am
+      M NEWS
+      M configure.ac
+
+Sun Dec 4 14:57:34 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Change @dircategory to `System administration' as suggested by Karl
+    Berry.
+
+      M doc/stow.texi
+
+Sat Dec 3 18:13:09 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add git push and update of online documentation to HOWTO-RELEASE.
+
+      M doc/HOWTO-RELEASE
+
+Sat Dec 3 17:51:48 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Release announcements should go to stow-devel too.
+
+      M doc/HOWTO-RELEASE
+
+Sat Dec 3 17:51:44 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix error in gnupload command-line.
+
+      M doc/HOWTO-RELEASE
+
+Sat Dec 3 17:09:48 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add a missing space.
+
+      M AUTHORS
+
+Sat Dec 3 16:40:20 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add a missing hyperlink to the Stow homepage.
+
+      M doc/stow.texi
+
 Sat Dec 3 14:03:58 2011 +0000  Adam Spiers <stow@adamspiers.org>
 
-    * Give up on automake's built-in rules for PDF and single-page HTML and
-    use our own.  Also include split version of the manual.
+    * Give up on automake's built-in rules for generating PDF and HTML and
+    use our own. Also include split version of the manual.
 
       M .gitignore
       M MANIFEST

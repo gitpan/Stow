@@ -43,7 +43,7 @@ use Stow::Util qw(set_debug_level debug error set_test_mode
                   join_paths restore_cwd canon_path parent);
 
 our $ProgramName = 'stow';
-our $VERSION = '2.1.0';
+our $VERSION = '2.1.1';
 
 our $LOCAL_IGNORE_FILE  = '.stow-local-ignore';
 our $GLOBAL_IGNORE_FILE = '.stow-global-ignore';
