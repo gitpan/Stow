@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 * Stow: (stow).           GNU Stow.
 END-INFO-DIR-ENTRY
 
-   This file describes GNU Stow version 2.1.1, a program for managing
+   This file describes GNU Stow version 2.1.2, a program for managing
 the installation of software packages.
 
    Software and documentation is copyrighted by the following:
@@ -38,7 +38,7 @@ File: stow.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Stow
 ****
 
-This manual describes GNU Stow 2.1.1, a program for managing the
+This manual describes GNU Stow 2.1.2, a program for managing the
 installation of software packages.
 
 * Menu:

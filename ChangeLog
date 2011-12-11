@@ -1,9 +1,81 @@
+Sun Dec 11 13:23:37 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Make stow script return true for t/stow.t According to
+    http://matrix.cpantesters.org/?dist=Stow this only seems to be an
+    issue with Perl <= 5.8.7.
+
+
+      M bin/stow.in
+
+Sun Dec 11 13:12:32 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Automate check for 'use lib' line in bin/stow.
+
+      M Build.PL
+      M doc/HOWTO-RELEASE
+
+Tue Dec 6 18:30:28 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Bump version to 2.1.2.
+
+      M META.json
+      M META.yml
+      M configure.ac
+
+Wed Dec 7 20:28:28 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Significantly improve the handling of --with-pmdir.
+
+      M INSTALL
+      M Makefile.am
+      M NEWS
+      M bin/stow.in
+      M configure.ac
+      M doc/HOWTO-RELEASE
+
+Wed Dec 7 01:20:07 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Make capitalisation consistent in usage text.
+
+      M bin/stow.in
+
+Wed Dec 7 20:31:18 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Abort ./configure if we can't find Perl.
+
+      M NEWS
+      M configure.ac
+
+Wed Dec 7 01:23:41 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Ensure the ChangeLog is up-to-date when making a new distribution. 
+    Thanks to Stefano Lattarini for this suggestion.
+
+
+      M Makefile.am
+      M NEWS
+      M doc/HOWTO-RELEASE
+
+Wed Dec 7 00:38:16 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Use maintainer-clean-local rule, not maintainer-clean.
+
+      M Makefile.am
+
+Tue Dec 6 18:20:03 2011 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * `make clean' shouldn't remove files which the user may not be able to
+    rebuild.
+
+      M Makefile.am
+
 Tue Dec 6 10:35:31 2011 +0000  Adam Spiers <stow@adamspiers.org>
 
     * Bump version to 2.1.1
 
       M META.json
       M META.yml
+      M NEWS
       M configure.ac
 
 Tue Dec 6 17:33:41 2011 +0000  Adam Spiers <stow@adamspiers.org>
