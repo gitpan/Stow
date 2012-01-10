@@ -33,6 +33,7 @@ NEWS
 README
 t/chkstow.t
 t/cleanup_invalid_links.t
+t/cli_options.t
 t/defer.t
 t/examples.t
 t/find_stowed_path.t
@@ -41,10 +42,9 @@ t/ignore.t
 t/join_paths.t
 t/parent.t
 t/stow.t
-t/stow_contents.t
 t/testutil.pm
-t/unstow_contents.t
-t/unstow_contents_orig.t
+t/unstow.t
+t/unstow_orig.t
 THANKS
 TODO
 META.yml

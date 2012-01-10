@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
 <html>
-<!-- Created on December 6, 2011 by texi2html 1.82
+<!-- Created on January 9, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -41,7 +41,7 @@ ul.toc {list-style: none}
 
 <body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
 
-<p>This file describes GNU Stow version 2.1.2, a program for
+<p>This file describes GNU Stow version 2.1.3, a program for
 managing the installation of software packages.
 </p>
 <p>Software and documentation is copyrighted by the following:
@@ -83,7 +83,7 @@ approved by the Free Software Foundation.
 <a name="SEC_Top"></a>
 <h1 class="settitle">Stow</h1>
 
-<p>This manual describes GNU Stow 2.1.2, a program for managing
+<p>This manual describes GNU Stow 2.1.3, a program for managing
 the installation of software packages.
 </p>
 <table class="menu" border="0" cellspacing="0">
@@ -390,6 +390,30 @@ pages that are owned by stow and would otherwise cause a conflict.
 the target directory, because this is what you will want to do most of the time.
 </p>
 </dd>
+<dt> &lsquo;<samp>-a</samp>&rsquo;</dt>
+<dt> &lsquo;<samp>--adopt</samp>&rsquo;</dt>
+<dd><p><strong>Warning!</strong> This behaviour is specifically intended to alter the
+contents of your stow directory.  If you do not want that, this option
+is not for you.
+</p>
+<p>When stowing, if a target is encountered which already exists but is a
+plain file (and hence not owned by any existing stow package), then
+normally Stow will register this as a conflict and refuse to proceed.
+This option changes that behaviour so that the file is moved to the
+same relative place within the package&rsquo;s installation image within the
+stow directory, and then stowing proceeds as before.  So effectively,
+the file becomes adopted by the stow package, without its contents
+changing.
+</p>
+<p>This is particularly useful when the stow package is under the control
+of a version control system, because it allows files in the target
+tree, with potentially different contents to the equivalent versions
+in the stow package&rsquo;s installation image, to be adopted into the
+package, then compared by running something like &lsquo;<samp>git diff ...</samp>&rsquo;
+inside the stow package, and finally either kept (e.g. via &lsquo;<samp>git
+commit ...</samp>&rsquo;) or discarded (&lsquo;<samp>git checkout HEAD ...</samp>&rsquo;).
+</p>
+</dd>
 <dt> &lsquo;<samp>-n</samp>&rsquo;</dt>
 <dt> &lsquo;<samp>--no</samp>&rsquo;</dt>
 <dt> &lsquo;<samp>--simulate</samp>&rsquo;</dt>
@@ -622,11 +646,11 @@ expressions which contain &lsquo;<samp>/</samp>&rsquo;, and <code>bazqux</code> 
 matching against regular expressions which don&rsquo;t contain &lsquo;<samp>/</samp>&rsquo;.
 Then regular expressions <code>bazqux</code>, <code>baz.*</code>, <code>.*qux</code>,
 <code>bar/.*x</code>, and <code>^/foo/.*qux</code> would all match (causing the
-file to be ignored), whereas <code>bar</code>, <code>baz</code>, and <code>qux</code>
-would not (although <code>bar</code> would cause its parent directory to be
-ignored and prevent Stow from recursing into that anyway, in which
-case the file &lsquo;<tt>bazqux</tt>&rsquo; would not even be considered for
-stowing).
+file to be ignored), whereas <code>bar</code>, <code>baz</code>, <code>qux</code>, and
+<code>o/bar/b</code> would not (although <code>bar</code> would cause its parent
+directory to be ignored and prevent Stow from recursing into that
+anyway, in which case the file &lsquo;<tt>bazqux</tt>&rsquo; would not even be
+considered for stowing).
 </p>
 <p>As a special exception to the above algorithm, any
 &lsquo;<tt>.stow-local-ignore</tt>&rsquo; present in the top-level package directory
@@ -2135,9 +2159,9 @@ to unanchored regular expressions which will match a substring.
 </p><h3><a name="FOOT3" href="#DOCF3">(3)</a></h3>
 <p>In this context, &ldquo;subpath&rdquo; means a contiguous
 subset of path segments; e.g for the relative path
-&lsquo;<tt>one/two/three/four</tt>&rsquo;, the following are examples of valid
-subpaths: &lsquo;<tt>one</tt>&rsquo;, &lsquo;<tt>two</tt>&rsquo;, &lsquo;<tt>two/three</tt>&rsquo;,
-&lsquo;<tt>two/three/four</tt>&rsquo;.
+&lsquo;<tt>one/two/three</tt>&rsquo;, there are six valid subpaths: &lsquo;<tt>one</tt>&rsquo;,
+&lsquo;<tt>two</tt>&rsquo;, &lsquo;<tt>three</tt>&rsquo;, &lsquo;<tt>one/two</tt>&rsquo;, &lsquo;<tt>two/three</tt>&rsquo;,
+&lsquo;<tt>one/two/three</tt>&rsquo;.
 </p><h3><a name="FOOT4" href="#DOCF4">(4)</a></h3>
 <p>The &ldquo;basename&rdquo; is the name of the file or
 directory itself, excluding any directory path prefix - as returned by
@@ -2212,7 +2236,7 @@ use the &lsquo;<samp>--badlinks</samp>&rsquo; option get stow to search for dang
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Adam Spiers</em> on <em>December 6, 2011</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Adam Spiers</em> on <em>January 9, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -2314,7 +2338,7 @@ use the &lsquo;<samp>--badlinks</samp>&rsquo; option get stow to search for dang
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Adam Spiers</em> on <em>December 6, 2011</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Adam Spiers</em> on <em>January 9, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 

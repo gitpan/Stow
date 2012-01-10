@@ -340,6 +340,29 @@ pages that are owned by stow and would otherwise cause a conflict.
 The regular expression is anchored to the beginning of the path relative to
 the target directory, because this is what you will want to do most of the time.
 
+@item -a
+@itemx --adopt
+@strong{Warning!} This behaviour is specifically intended to alter the
+contents of your stow directory.  If you do not want that, this option
+is not for you.
+
+When stowing, if a target is encountered which already exists but is a
+plain file (and hence not owned by any existing stow package), then
+normally Stow will register this as a conflict and refuse to proceed.
+This option changes that behaviour so that the file is moved to the
+same relative place within the package's installation image within the
+stow directory, and then stowing proceeds as before.  So effectively,
+the file becomes adopted by the stow package, without its contents
+changing.
+
+This is particularly useful when the stow package is under the control
+of a version control system, because it allows files in the target
+tree, with potentially different contents to the equivalent versions
+in the stow package's installation image, to be adopted into the
+package, then compared by running something like @samp{git diff ...}
+inside the stow package, and finally either kept (e.g. via @samp{git
+commit ...}) or discarded (@samp{git checkout HEAD ...}).
+
 @item -n
 @itemx --no
 @itemx --simulate
@@ -477,9 +500,9 @@ regular expression is anchored at the beginning and end, in contrast
 to unanchored regular expressions which will match a substring.} match
 a subpath@footnote{In this context, ``subpath'' means a contiguous
 subset of path segments; e.g for the relative path
-@file{one/two/three/four}, the following are examples of valid
-subpaths: @file{one}, @file{two}, @file{two/three},
-@file{two/three/four}.} of this relative path, then the file or
+@file{one/two/three}, there are six valid subpaths: @file{one},
+@file{two}, @file{three}, @file{one/two}, @file{two/three},
+@file{one/two/three}.} of this relative path, then the file or
 directory will be ignored.
 
 @item
@@ -505,11 +528,11 @@ expressions which contain @samp{/}, and @code{bazqux} as the text for
 matching against regular expressions which don't contain @samp{/}.
 Then regular expressions @code{bazqux}, @code{baz.*}, @code{.*qux},
 @code{bar/.*x}, and @code{^/foo/.*qux} would all match (causing the
-file to be ignored), whereas @code{bar}, @code{baz}, and @code{qux}
-would not (although @code{bar} would cause its parent directory to be
-ignored and prevent Stow from recursing into that anyway, in which
-case the file @file{bazqux} would not even be considered for
-stowing).
+file to be ignored), whereas @code{bar}, @code{baz}, @code{qux}, and
+@code{o/bar/b} would not (although @code{bar} would cause its parent
+directory to be ignored and prevent Stow from recursing into that
+anyway, in which case the file @file{bazqux} would not even be
+considered for stowing).
 
 As a special exception to the above algorithm, any
 @file{.stow-local-ignore} present in the top-level package directory

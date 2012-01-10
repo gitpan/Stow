@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "STOW.IN 1"
-.TH STOW.IN 1 "2011-12-11" "perl v5.12.4" "User Contributed Perl Documentation"
+.TH STOW.IN 1 "2012-01-09" "perl v5.12.4" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -289,6 +289,24 @@ than installing them.
 Restow packages (first unstow, then stow again). This is useful
 for pruning obsolete symlinks from the target tree after updating
 the software in a package.
+.IP "\-a" 4
+.IX Item "-a"
+.PD 0
+.IP "\-\-adopt" 4
+.IX Item "--adopt"
+.PD
+\&\fBWarning!\fR  This behaviour is specifically intended to alter the
+contents of your stow directory.  If you do not want that, this option
+is not for you.
+.Sp
+When stowing, if a target is encountered which already exists but is a
+plain file (and hence not owned by any existing stow package), then
+normally Stow will register this as a conflict and refuse to proceed.
+This option changes that behaviour so that the file is moved to the
+same relative place within the package's installation image within the
+stow directory, and then stowing proceeds as before.  So effectively,
+the file becomes adopted by the stow package, without its contents
+changing.
 .IP "\-\-ignore=REGEX" 4
 .IX Item "--ignore=REGEX"
 Ignore files ending in this Perl regex.

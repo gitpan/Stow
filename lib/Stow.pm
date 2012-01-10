@@ -35,7 +35,8 @@ rebuild the target tree.
 use strict;
 use warnings;
 
-use Carp qw(carp cluck croak confess);
+use Carp qw(carp cluck croak confess longmess);
+use File::Copy qw(move);
 use File::Spec;
 use POSIX qw(getcwd);
 
@@ -43,7 +44,7 @@ use Stow::Util qw(set_debug_level debug error set_test_mode
                   join_paths restore_cwd canon_path parent);
 
 our $ProgramName = 'stow';
-our $VERSION = '2.1.2';
+our $VERSION = '2.1.3';
 
 our $LOCAL_IGNORE_FILE  = '.stow-local-ignore';
 our $GLOBAL_IGNORE_FILE = '.stow-global-ignore';
@@ -59,6 +60,7 @@ our %DEFAULT_OPTIONS = (
     paranoid   => 0,
     compat     => 0,
     test_mode  => 0,
+    adopt      => 0,
     ignore     => [],
     override   => [],
     defer      => [],
@@ -198,10 +200,11 @@ sub init_state {
     # $self->{tasks}:  list of operations to be performed (in order)
     # each element is a hash ref of the form
     #   {
-    #       action => ...
-    #       type   => ...
+    #       action => ...  ('create' or 'remove' or 'move')
+    #       type   => ...  ('link' or 'dir' or 'file')
     #       path   => ...  (unique)
     #       source => ...  (only for links)
+    #       dest   => ...  (only for moving files)
     #   }
     $self->{tasks} = [];
 
@@ -490,11 +493,17 @@ sub stow_node {
             );
         }
         else {
-            $self->conflict(
-                'stow',
-                $package,
-                "existing target is neither a link nor a directory: $target"
-            );
+            if ($self->{adopt}) {
+                $self->do_mv($target, $path);
+                $self->do_link($source, $target);
+            }
+            else {
+                $self->conflict(
+                    'stow',
+                    $package,
+                    "existing target is neither a link nor a directory: $target"
+                );
+            }
         }
     }
     else {
@@ -823,7 +832,7 @@ sub unstow_node {
 
 #===== METHOD ===============================================================
 # Name      : path_owned_by_package()
-# Purpose   : determine if the given link points to a member of a
+# Purpose   : determine whether the given link points to a member of a
 #           : stowed package
 # Parameters: $target => path to a symbolic link under current directory
 #           : $source => where that link points to
@@ -842,7 +851,7 @@ sub path_owned_by_package {
 
 #===== METHOD ===============================================================
 # Name      : find_stowed_path()
-# Purpose   : determine if the given link points to a member of a
+# Purpose   : determine whether the given link points to a member of a
 #           : stowed package
 # Parameters: $target => path to a symbolic link under current directory
 #           : $source => where that link points to (needed because link
@@ -962,7 +971,7 @@ sub cleanup_invalid_links {
 
 #===== METHOD ===============================================================
 # Name      : foldable()
-# Purpose   : determine if a tree can be folded
+# Purpose   : determine whether a tree can be folded
 # Parameters: $target => path to a directory
 # Returns   : path to the parent dir iff the tree can be safely folded
 # Throws    : n/a
@@ -1413,6 +1422,7 @@ sub process_task {
         if ($task->{type} eq 'dir') {
             mkdir($task->{path}, 0777)
                 or error(qq(Could not create directory: $task->{path}));
+            return;
         }
         elsif ($task->{type} eq 'link') {
             symlink $task->{source}, $task->{path}
@@ -1421,27 +1431,33 @@ sub process_task {
                     $task->{path},
                     $task->{source}
             );
-        }
-        else {
-            internal_error(qq(bad task type: $task->{type}));
+            return;
         }
     }
     elsif ($task->{action} eq 'remove') {
         if ($task->{type} eq 'dir') {
             rmdir $task->{path}
                 or error(qq(Could not remove directory: $task->{path}));
+            return;
         }
         elsif ($task->{type} eq 'link') {
             unlink $task->{path}
                 or error(qq(Could not remove link: $task->{path}));
-        }
-        else {
-            internal_error(qq(bad task type: $task->{type}));
+            return;
         }
     }
-    else {
-        internal_error(qq(bad task action: $task->{action}));
+    elsif ($task->{action} eq 'move') {
+        if ($task->{type} eq 'file') {
+            # rename() not good enough, since the stow directory
+            # might be on a different filesystem to the target.
+            move $task->{path}, $task->{dest}
+                or error(qq(Could not move $task->{path} -> $task->{dest}));
+            return;
+        }
     }
+
+    # Should never happen.
+    internal_error(qq(bad task action: $task->{action}));
 }
 
 #===== METHOD ===============================================================
@@ -1496,7 +1512,7 @@ sub dir_task_action {
 
 #===== METHOD ===============================================================
 # Name      : parent_link_scheduled_for_removal()
-# Purpose   : determines whether the given path or any parent thereof
+# Purpose   : determine whether the given path or any parent thereof
 #           : is a link scheduled for removal
 # Parameters: $path
 # Returns   : Boolean
@@ -1524,7 +1540,7 @@ sub parent_link_scheduled_for_removal {
 
 #===== METHOD ===============================================================
 # Name      : is_a_link()
-# Purpose   : is the given path a current or planned link
+# Purpose   : determine if the given path is a current or planned link
 # Parameters: $path
 # Returns   : Boolean
 # Throws    : none
@@ -1558,7 +1574,7 @@ sub is_a_link {
 
 #===== METHOD ===============================================================
 # Name      : is_a_dir()
-# Purpose   : is the given path a current or planned directory
+# Purpose   : determine if the given path is a current or planned directory
 # Parameters: $path
 # Returns   : Boolean
 # Throws    : none
@@ -1593,7 +1609,7 @@ sub is_a_dir {
 
 #===== METHOD ===============================================================
 # Name      : is_a_node()
-# Purpose   : is the given path a current or planned node
+# Purpose   : determine whether the given path is a current or planned node
 # Parameters: $path
 # Returns   : Boolean
 # Throws    : none
@@ -1946,6 +1962,53 @@ sub do_rmdir {
     return;
 }
 
+#===== METHOD ===============================================================
+# Name      : do_mv()
+# Purpose   : wrap 'move' operation for later processing
+# Parameters: $src => the file to move
+#           : $dst => the path to move it to
+# Returns   : n/a
+# Throws    : error if this clashes with an existing planned operation
+# Comments  : alters contents of package installation image in stow dir
+#============================================================================
+sub do_mv {
+    my $self = shift;
+    my ($src, $dst) = @_;
+
+    if (exists $self->{link_task_for}{$src}) {
+        # I don't *think* this should ever happen, but I'm not
+        # 100% sure.
+        my $task_ref = $self->{link_task_for}{$src};
+        internal_error(
+            "do_mv: pre-existing link task for $src; action: %s, source: %s",
+            $task_ref->{action}, $task_ref->{source}
+        );
+    }
+    elsif (exists $self->{dir_task_for}{$src}) {
+        my $task_ref = $self->{dir_task_for}{$src};
+        internal_error(
+            "do_mv: pre-existing dir task for %s?! action: %s",
+            $src, $task_ref->{action}
+        );
+    }
+
+    # Remove the link
+    debug(1, "MV: $src -> $dst");
+
+    my $task = {
+        action  => 'move',
+        type    => 'file',
+        path    => $src,
+        dest    => $dst,
+    };
+    push @{ $self->{tasks} }, $task;
+
+    # FIXME: do we need this for anything?
+    #$self->{mv_task_for}{$file} = $task;
+
+    return;
+}
+
 
 #############################################################################
 #
@@ -1963,8 +2026,15 @@ sub do_rmdir {
 #============================================================================
 sub internal_error {
     my ($format, @args) = @_;
-    die "$ProgramName: INTERNAL ERROR: " . sprintf($format, @args) . "\n",
-        "This _is_ a bug. Please submit a bug report so we can fix it:-)\n";
+    my $error = sprintf($format, @args);
+    my $stacktrace = Carp::longmess();
+    die <<EOF;
+
+$ProgramName: INTERNAL ERROR: $error$stacktrace
+
+This _is_ a bug. Please submit a bug report so we can fix it! :-)
+See http://www.gnu.org/software/stow/ for how to do this.
+EOF
 }
 
 =head1 BUGS
