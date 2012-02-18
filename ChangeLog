@@ -1,3 +1,186 @@
+Sat Feb 18 17:08:19 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Bump version to 2.2.0
+
+      M META.json
+      M META.yml
+      M NEWS
+      M configure.ac
+
+Sat Feb 18 20:13:32 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add --no-folding option.
+
+      M NEWS
+      M bin/stow.in
+      M doc/stow.texi
+      M lib/Stow.pm.in
+      M t/stow.t
+      M t/testutil.pm
+      M t/unstow.t
+
+Sat Feb 18 14:20:07 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Remove -a option for safety reasons (but keep --adopt).
+
+      M NEWS
+      M bin/stow.in
+      M doc/stow.texi
+
+Sat Feb 18 20:12:14 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Improve error message when package is not found.
+
+      M NEWS
+      M lib/Stow.pm.in
+
+Sat Feb 18 20:19:05 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Use make_invalid_link() to reliably setup symlink fixtures.
+
+      M NEWS
+      M t/chkstow.t
+      M t/cleanup_invalid_links.t
+      M t/stow.t
+      M t/testutil.pm
+      M t/unstow.t
+      M t/unstow_orig.t
+
+Sat Feb 18 15:47:36 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add documentation improvements to NEWS.
+
+      M NEWS
+
+Sat Feb 18 17:07:15 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Update TODO
+
+      M TODO
+
+Sat Feb 18 20:32:40 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Last known bug was fixed a long time ago :-)
+
+      M doc/stow.texi
+
+Sat Feb 18 15:47:19 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Update structure of manual to match recommended texinfo structure. 
+    TOC now appears after title page. Copying information is no
+    longer duplicated.
+
+
+      M doc/stow.texi
+
+Sat Feb 18 15:46:14 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix various formatting issues in the manual.
+
+      M doc/stow.texi
+
+Sat Feb 18 15:45:49 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add some more index entries to the manual.
+
+      M doc/stow.texi
+
+Sat Feb 18 15:45:16 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add some @sections to the manual to break larger nodes up.
+
+      M doc/stow.texi
+
+Sat Feb 18 15:17:21 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Use @command / @samp / @env / @var in the manual where appropriate,
+    rather than @code.
+
+      M doc/stow.texi
+
+Sat Feb 18 15:03:52 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix formatting of regexp values in the manual.
+
+      M doc/stow.texi
+
+Sat Feb 18 14:15:14 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add --adopt to usage text.
+
+      M bin/stow.in
+
+Sat Feb 18 14:11:33 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Improve ordering of options in usage text.
+
+      M bin/stow.in
+
+Sat Feb 18 14:08:17 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Add missing options to pod, and reference to front-end documentation.
+
+      M lib/Stow.pm.in
+
+Sat Feb 18 14:07:45 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Ignore tmp-testing-trees anywhere.
+
+      M .gitignore
+      M MANIFEST.SKIP
+
+Sat Feb 18 12:28:00 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Make shared library tests match real-world scenarios. Typically,
+    libfoo.so.X.Y.Z is the file, and libfoo.so is the symlink which
+    points to it.
+
+
+      M t/stow.t
+
+Sat Feb 18 11:53:46 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Include --simulate in usage text.
+
+      M bin/stow.in
+
+Fri Jan 13 11:34:55 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Avoid "Use of uninitialized value" warnings from test suite. Happened
+    on some versions of Perl when TEST_VERBOSE not yet. Thanks Adam
+    Sampson!
+
+
+      M lib/Stow.pm.in
+
+Thu Jan 12 17:54:32 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Remove reference to old FSF address (thank you rpmlint for catching
+    this!)
+
+      M bin/stow.in
+
+Wed Jan 11 14:01:40 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Remove "There are no outstanding operations to perform" warning. This
+    is more in keeping with the UNIX convention of no output on
+    success, and is also the way Stow v1.x behaved.  Thanks to Adam
+    Sampson for the suggestion.
+
+
+      M NEWS
+      M THANKS
+      M lib/Stow.pm.in
+      M t/stow.t
+      M t/unstow.t
+      M t/unstow_orig.t
+
+Tue Jan 10 12:17:58 2012 +0000  Adam Spiers <stow@adamspiers.org>
+
+    * Fix wrong version number in NEWS.
+
+      M NEWS
+
 Mon Jan 9 21:39:35 2012 +0000  Adam Spiers <stow@adamspiers.org>
 
     * Bump version to 2.1.3

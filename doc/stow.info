@@ -1,13 +1,8 @@
 This is doc/stow.info, produced by makeinfo version 4.13 from
 ./doc/stow.texi.
 
-INFO-DIR-SECTION System administration
-START-INFO-DIR-ENTRY
-* Stow: (stow).           GNU Stow.
-END-INFO-DIR-ENTRY
-
-   This file describes GNU Stow version 2.1.3, a program for managing
-the installation of software packages.
+This manual describes GNU Stow version 2.2.0 (18 February 2012), a
+program for managing the installation of software packages.
 
    Software and documentation is copyrighted by the following:
 
@@ -16,30 +11,35 @@ the installation of software packages.
 (C) 2007 Kahlil (Kal) Hodgson <kahlil@internode.on.net>
 (C) 2011 Adam Spiers <stow@adamspiers.org>
 
-   Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.
+     Permission is granted to make and distribute verbatim copies of
+     this manual provided the copyright notice and this permission
+     notice are preserved on all copies.
 
-   Permission is granted to copy and distribute modified versions of
-this manual under the conditions for verbatim copying, provided also
-that the section entitled "GNU General Public License" is included with
-the modified manual, and provided that the entire resulting derived
-work is distributed under the terms of a permission notice identical to
-this one.
+     Permission is granted to copy and distribute modified versions of
+     this manual under the conditions for verbatim copying, provided
+     also that the section entitled "GNU General Public License" is
+     included with the modified manual, and provided that the entire
+     resulting derived work is distributed under the terms of a
+     permission notice identical to this one.
 
-   Permission is granted to copy and distribute translations of this
-manual into another language, under the above conditions for modified
-versions, except that this permission notice may be stated in a
-translation approved by the Free Software Foundation.
+     Permission is granted to copy and distribute translations of this
+     manual into another language, under the above conditions for
+     modified versions, except that this permission notice may be
+     stated in a translation approved by the Free Software Foundation.
+
+INFO-DIR-SECTION System administration
+START-INFO-DIR-ENTRY
+* Stow: (stow).           GNU Stow.
+END-INFO-DIR-ENTRY
 
 
-File: stow.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
+File: stow.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
 Stow
 ****
 
-This manual describes GNU Stow 2.1.3, a program for managing the
-installation of software packages.
+This manual describes GNU Stow 2.2.0 (18 February 2012), a program for
+managing the installation of software packages.
 
 * Menu:
 
@@ -69,7 +69,7 @@ Ignore Lists
 * Types And Syntax Of Ignore Lists::
 * Justification For Yet Another Set Of Ignore Files::
 
-Compile-time vs Install-time
+Advice on changing compilation and installation parameters
 
 * GNU Emacs::
 * Other FSF Software::
@@ -209,7 +209,7 @@ The following options are supported:
      directory.  Defaults to the parent of the stow directory, so it is
      typical to execute `stow' from the directory `/usr/local/stow'.
 
-`--ignore='<regex>''
+`--ignore=REGEXP'
      This (repeatable) option lets you suppress acting on files that
      match the given perl regular expression.  For example, using the
      options
@@ -226,7 +226,7 @@ The following options are supported:
      built-in list of files and directories such as `CVS', editor
      backup files, and so on.  *Note Ignore Lists::, for more details.
 
-`--defer='<regex>''
+`--defer=REGEXP'
      This (repeatable) option avoids stowing a file matching the given
      regular expression, if that file is already stowed by another
      package.  This is effectively the opposite of `--override'.
@@ -240,7 +240,7 @@ The following options are supported:
 
      For example, the following options
 
-          --defer='man' --defer='info'
+          --defer=man --defer=info
 
      will cause stow to skip over pre-existing man and info pages.
 
@@ -251,12 +251,12 @@ The following options are supported:
      the path relative to the target directory, because this is what
      you will want to do most of the time.
 
-`--override='<regex>''
+`--override=REGEXP'
      This (repeatable) option forces any file matching the regular
      expression to be stowed, even if the file is already stowed to
      another package. For example, the following options
 
-          --override='man' --override='info'
+          --override=man --override=info
 
      will permit stow to overwrite links that point to pre-existing man
      and info pages that are owned by stow and would otherwise cause a
@@ -266,7 +266,16 @@ The following options are supported:
      relative to the target directory, because this is what you will
      want to do most of the time.
 
-`-a'
+`--no-folding'
+     This disables any further *note tree folding:: or *note tree
+     refolding::.  If a new subdirectory is encountered whilst stowing
+     a new package, the subdirectory is created within the target, and
+     its contents are symlinked, rather than just creating a symlink
+     for the directory.  If removal of symlinks whilst unstowing a
+     package causes a subtree to be foldable (i.e. only containing
+     symlinks to a single package), that subtree will not be removed
+     and replaced with a symlink.
+
 `--adopt'
      *Warning!* This behaviour is specifically intended to alter the
      contents of your stow directory.  If you do not want that, this
@@ -483,7 +492,7 @@ File: stow.info,  Node: Justification For Yet Another Set Of Ignore Files,  Prev
 =====================================================
 
 The reader may note that this format is very similar to existing ignore
-list file formats, such as those for `CVS', `git', `rsync' etc., and
+list file formats, such as those for `cvs', `git', `rsync' etc., and
 wonder if another set of ignore lists is justified.  However there are
 good reasons why Stow does not simply check for the presence of say,
 `.cvsignore', and use that if it exists.  Firstly, there is no
@@ -519,7 +528,10 @@ Stow can create a single symlink that points to an entire subtree within
 the package tree, it will choose to do that rather than create a
 directory in the target tree and populate it with symlinks.
 
-   For example, suppose that no packages have yet been installed in
+5.1 Tree folding
+================
+
+For example, suppose that no packages have yet been installed in
 `/usr/local'; it's completely empty (except for the `stow'
 subdirectory, of course).  Now suppose the Perl package is installed.
 Recall that it includes the following directories in its installation
@@ -548,9 +560,13 @@ already exists and is a directory, as are `/usr/local/lib' and
 `/usr/local/lib' and create the tree-folding symlink `perl' pointing to
 `../stow/perl/lib/perl', and so on.  As a rule, Stow only descends as
 far as necessary into the target tree when it can create a tree-folding
-symlink.
+symlink.  However, this behaviour can be changed via the `--no-folding'
+option; *note Invoking Stow::.
 
-   The time often comes when a tree-folding symlink has to be undone
+5.2 Tree unfolding
+==================
+
+The time often comes when a tree-folding symlink has to be undone
 because another package uses one or more of the folded subdirectories in
 its installation image.  This operation is called "splitting open" or
 "unfolding" a folded tree.  It involves removing the original symlink
@@ -568,8 +584,11 @@ deleted; the directory `/usr/local/bin' is created; links are made from
 `../stow/emacs/bin/etags'; and links are made from `/usr/local/bin' to
 `../stow/perl/bin/perl' and `../stow/perl/bin/a2p'.
 
-   When splitting open a folded tree, Stow makes sure that the symlink
-it is about to remove points inside a valid package in the current stow
+5.3 Ownership
+=============
+
+When splitting open a folded tree, Stow makes sure that the symlink it
+is about to remove points inside a valid package in the current stow
 directory.  _Stow will never delete anything that it doesn't own_.
 Stow "owns" everything living in the target tree that points into a
 package in the stow directory.  Anything Stow owns, it can recompute if
@@ -578,9 +597,12 @@ directories that only contain symlinks that stow "owns".   Note that by
 this definition, Stow doesn't "own" anything _in_ the stow directory or
 in any of the packages.
 
-   If Stow needs to create a directory or a symlink in the target tree
-and it cannot because that name is already in use and is not owned by
-Stow, then a "conflict" has arisen.  *Note Conflicts::.
+5.4 Conflicts during installation
+=================================
+
+If Stow needs to create a directory or a symlink in the target tree and
+it cannot because that name is already in use and is not owned by Stow,
+then a "conflict" has arisen.  *Note Conflicts::.
 
 
 File: stow.info,  Node: Deleting Packages,  Next: Conflicts,  Prev: Installing Packages,  Up: Top
@@ -602,12 +624,18 @@ directory and a `man' directory at the top level, then we only scan
 `/usr/local/share', or for that matter `/usr/local/stow'.  Any symlink
 it finds that points into the package being deleted is removed.  Any
 directory that contained only symlinks to the package being deleted is
-removed.  Any directory that, after removing symlinks and empty
-subdirectories, contains only symlinks to a single other package, is
-considered to be a previously "folded" tree that was "split open."  Stow
-will re-fold the tree by removing the symlinks to the surviving package,
-removing the directory, then linking the directory back to the surviving
-package.
+removed.
+
+6.1 Refolding "foldable" trees.
+===============================
+
+After removing symlinks and empty subdirectories, any directory that
+contains only symlinks to a single other package is considered to be a
+previously "folded" tree that was "split open."  Stow will refold the
+tree by removing the symlinks to the surviving package, removing the
+directory, then linking the directory back to the surviving package.
+However, this behaviour can be prevented via the `--no-folding' option;
+*note Invoking Stow::.
 
    ---------- Footnotes ----------
 
@@ -784,7 +812,7 @@ only used for Perl modules, then you might place the following in
 
    so that the when your are in the `/usr/local/stow/perl-extras'
 directory, `stow' will regard any subdirectories as stow packages, with
-`/usr/local' as the target (rather than the immediate parent directoy
+`/usr/local' as the target (rather than the immediate parent directory
 `/usr/local/stow'), overriding any pre-existing links to bin files or
 man pages, and ignoring some cruft that gets installed by default.
 
@@ -813,13 +841,16 @@ files in `/usr/local', then it will find the intermingled Perl and
 location of the run-time, or target tree; but when you install it, you
 must place it in the stow tree.
 
-   Some software packages allow you to specify, at compile-time,
-separate locations for installation and for run-time.  Perl is one such
-package; see *note Perl and Perl 5 Modules::.  Others allow you to
-compile the package, then give a different destination in the `make
-install' step without causing the binaries or other files to get
-rebuilt.  Most GNU software falls into this category; Emacs is a
-notable exception.  *Note GNU Emacs::, and *note Other FSF Software::.
+12.1 Advice on changing compilation and installation parameters
+===============================================================
+
+Some software packages allow you to specify, at compile-time, separate
+locations for installation and for run-time.  Perl is one such package;
+see *note Perl and Perl 5 Modules::.  Others allow you to compile the
+package, then give a different destination in the `make install' step
+without causing the binaries or other files to get rebuilt.  Most GNU
+software falls into this category; Emacs is a notable exception.  *Note
+GNU Emacs::, and *note Other FSF Software::.
 
    Still other software packages cannot abide the idea of separate
 installation and run-time locations at all.  If you try to `make
@@ -836,10 +867,10 @@ shell that `make install' would have used.
    (If you use GNU Make and a shell [such as GNU bash] that understands
 `pushd' and `popd', you can do the following:
 
-  1. Replace all lines matching `make[N]: Entering directory `DIR''
-     with `pushd DIR'.
+  1. Replace all lines matching `make[N]: Entering directory DIR' with
+     `pushd DIR'.
 
-  2. Replace all lines matching `make[N]: Leaving directory `DIR'' with
+  2. Replace all lines matching `make[N]: Leaving directory DIR' with
      `popd'.
 
   3. Delete all lines matching `make[N]: Nothing to be done for RULE'.
@@ -868,7 +899,7 @@ following sections.
 
 File: stow.info,  Node: GNU Emacs,  Next: Other FSF Software,  Prev: Compile-time vs Install-time,  Up: Compile-time vs Install-time
 
-12.1 GNU Emacs
+12.2 GNU Emacs
 ==============
 
 Although the Free Software Foundation has many enlightened practices
@@ -879,10 +910,10 @@ rules.  In particular, most GNU software allows you to write:
      make
      make install prefix=/usr/local/stow/PACKAGE
 
-If you try this with Emacs, then the new value for `prefix' in the
-`make install' step will cause some files to get recompiled with the
-new value of `prefix' wired into them.  In Emacs 19.23 and later,(1)
-the way to work around this problem is:
+If you try this with Emacs, then the new value for PREFIX in the `make
+install' step will cause some files to get recompiled with the new
+value of PREFIX wired into them.  In Emacs 19.23 and later,(1) the way
+to work around this problem is:
 
      make
      make install-arch-dep install-arch-indep prefix=/usr/local/stow/emacs
@@ -899,7 +930,7 @@ the way to work around this problem is:
 
 File: stow.info,  Node: Other FSF Software,  Next: Cygnus Software,  Prev: GNU Emacs,  Up: Compile-time vs Install-time
 
-12.2 Other FSF Software
+12.3 Other FSF Software
 =======================
 
 The Free Software Foundation, the organization behind the GNU project,
@@ -920,7 +951,7 @@ the build process.
 
 File: stow.info,  Node: Cygnus Software,  Next: Perl and Perl 5 Modules,  Prev: Other FSF Software,  Up: Compile-time vs Install-time
 
-12.3 Cygnus Software
+12.4 Cygnus Software
 ====================
 
 Cygnus is a commercial supplier and supporter of GNU software.  It has
@@ -951,7 +982,7 @@ manually.
 
 File: stow.info,  Node: Perl and Perl 5 Modules,  Prev: Cygnus Software,  Up: Compile-time vs Install-time
 
-12.4 Perl and Perl 5 Modules
+12.5 Perl and Perl 5 Modules
 ============================
 
 Perl 4.036 allows you to specify different locations for installation
@@ -1083,7 +1114,8 @@ The address to use is `<bug-stow@gnu.org>'.  Please include:
      adding `--verbose=3' to the Stow command line).
 
    If you are really keen, consider developing a minimal test case and
-creating a new test.  See the `t/' for lots of examples.
+creating a new test.  See the `t/' directory in the source for lots of
+examples.
 
    Before reporting a bug, please read the manual carefully, especially
 *note Known Bugs::, to see whether you're encountering something that
@@ -1095,15 +1127,8 @@ File: stow.info,  Node: Known Bugs,  Next: GNU General Public License,  Prev: Re
 15 Known Bugs
 *************
 
-   * When using multiple stow directories (*note Multiple Stow
-     Directories::), Stow fails to "split open" tree-folding symlinks
-     (*note Installing Packages::) that point into a stow directory
-     which is not the one in use by the current Stow command.  Before
-     failing, it should search the target of the link to see whether
-     any element of the path contains a `.stow' file.  If it finds one,
-     it can "learn" about the cooperating stow directory to
-     short-circuit the `.stow' search the next time it encounters a
-     tree-folding symlink.
+There are no known bugs in Stow version 2.2.0!  If you think you have
+found one, please *note Reporting Bugs::.
 
 
 File: stow.info,  Node: GNU General Public License,  Next: Index,  Prev: Known Bugs,  Up: Top
@@ -1475,63 +1500,75 @@ Index
  [index ]
 * Menu:
 
-* absolute symlink:                      Terminology.          (line 43)
-* conflict:                              Installing Packages.  (line 72)
-* deletion:                              Deleting Packages.    (line  6)
-* directory folding:                     Installing Packages.  (line 13)
-* folding trees:                         Installing Packages.  (line 13)
+* absolute symlink:                      Terminology.         (line  43)
+* adopting existing files:               Invoking Stow.       (line  97)
+* conflicts:                             Installing Packages. (line  85)
+* deletion:                              Deleting Packages.   (line   6)
+* directory folding:                     Installing Packages. (line  16)
+* dry run:                               Invoking Stow.       (line 120)
+* folding trees:                         Installing Packages. (line  16)
 * ignore lists <1>:                      Motivation For Ignore Lists.
-                                                               (line 26)
-* ignore lists:                          Ignore Lists.         (line  6)
-* ignoring files and directories:        Ignore Lists.         (line  6)
-* installation:                          Installing Packages.  (line  6)
-* installation image:                    Terminology.          (line 23)
-* ownership:                             Installing Packages.  (line 62)
-* package:                               Terminology.          (line  6)
-* package directory:                     Terminology.          (line 30)
-* package name:                          Terminology.          (line 30)
-* relative symlink:                      Terminology.          (line 43)
-* splitting open folded trees:           Installing Packages.  (line 44)
-* stow directory:                        Terminology.          (line 16)
-* symlink:                               Terminology.          (line 43)
-* target directory:                      Terminology.          (line 11)
-* tree folding:                          Installing Packages.  (line 13)
-* unfolding trees:                       Installing Packages.  (line 44)
+                                                              (line  26)
+* ignore lists:                          Ignore Lists.        (line   6)
+* ignoring files and directories:        Ignore Lists.        (line   6)
+* installation:                          Installing Packages. (line   6)
+* installation conflicts:                Installing Packages. (line  85)
+* installation image:                    Terminology.         (line  23)
+* ownership:                             Installing Packages. (line  72)
+* package:                               Terminology.         (line   6)
+* package directory:                     Terminology.         (line  30)
+* package name:                          Terminology.         (line  30)
+* refolding trees:                       Deleting Packages.   (line  25)
+* relative symlink:                      Terminology.         (line  43)
+* simulated run:                         Invoking Stow.       (line 120)
+* splitting open folded trees:           Installing Packages. (line  51)
+* stow directory:                        Terminology.         (line  16)
+* symlink:                               Terminology.         (line  43)
+* target directory:                      Terminology.         (line  11)
+* tree folding:                          Installing Packages. (line  16)
+* tree refolding:                        Deleting Packages.   (line  25)
+* tree unfolding:                        Installing Packages. (line  51)
+* tree unsplitting:                      Installing Packages. (line  51)
+* unfolding trees:                       Installing Packages. (line  51)
+* verbosity levels:                      Invoking Stow.       (line 126)
 
 
 
 Tag Table:
-Node: Top1372
-Node: Introduction2860
-Ref: Introduction-Footnote-15023
-Node: Terminology5065
-Node: Invoking Stow7428
-Node: Ignore Lists13723
-Node: Motivation For Ignore Lists13987
-Node: Types And Syntax Of Ignore Lists15482
-Ref: Types And Syntax Of Ignore Lists-Footnote-118596
-Ref: Types And Syntax Of Ignore Lists-Footnote-218762
-Ref: Types And Syntax Of Ignore Lists-Footnote-318978
-Node: Justification For Yet Another Set Of Ignore Files19123
-Node: Installing Packages20721
-Node: Deleting Packages24975
-Ref: Deleting Packages-Footnote-126395
-Node: Conflicts26983
-Ref: Deferred Operation27969
-Node: Mixing Operations28570
-Node: Multiple Stow Directories29562
-Node: Target Maintenance30622
-Node: Resource Files31852
-Node: Compile-time vs Install-time33462
-Node: GNU Emacs36750
-Ref: GNU Emacs-Footnote-137739
-Node: Other FSF Software37803
-Node: Cygnus Software38564
-Node: Perl and Perl 5 Modules40043
-Node: Bootstrapping43598
-Node: Reporting Bugs44379
-Node: Known Bugs45334
-Node: GNU General Public License46037
-Node: Index65177
+Node: Top1446
+Node: Introduction2969
+Ref: Introduction-Footnote-15132
+Node: Terminology5174
+Node: Invoking Stow7537
+Node: Ignore Lists14340
+Node: Motivation For Ignore Lists14604
+Node: Types And Syntax Of Ignore Lists16099
+Ref: Types And Syntax Of Ignore Lists-Footnote-119213
+Ref: Types And Syntax Of Ignore Lists-Footnote-219379
+Ref: Types And Syntax Of Ignore Lists-Footnote-319595
+Node: Justification For Yet Another Set Of Ignore Files19740
+Node: Installing Packages21338
+Ref: tree folding21900
+Ref: Tree unfolding23778
+Node: Deleting Packages25846
+Ref: tree refolding26878
+Ref: Deleting Packages-Footnote-127423
+Node: Conflicts28011
+Ref: Deferred Operation28997
+Node: Mixing Operations29598
+Node: Multiple Stow Directories30590
+Node: Target Maintenance31650
+Node: Resource Files32880
+Node: Compile-time vs Install-time34491
+Node: GNU Emacs37901
+Ref: GNU Emacs-Footnote-138886
+Node: Other FSF Software38950
+Node: Cygnus Software39711
+Node: Perl and Perl 5 Modules41190
+Node: Bootstrapping44745
+Node: Reporting Bugs45526
+Node: Known Bugs46505
+Node: GNU General Public License46753
+Node: Index65893
 
 End Tag Table

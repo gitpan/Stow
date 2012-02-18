@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 38;
 use Test::Output;
 use English qw(-no_match_vars);
 
@@ -87,7 +87,7 @@ $stow = new_Stow();
 make_dir('bin4');
 make_dir('../stow/pkg4/bin4');
 make_file('../stow/pkg4/bin4/file4');
-make_link('bin4/file4', '../../stow/pkg4/bin4/does-not-exist');
+make_invalid_link('bin4/file4', '../../stow/pkg4/bin4/does-not-exist');
 
 $stow->plan_unstow('pkg4');
 $stow->process_tasks();
@@ -103,7 +103,7 @@ ok(
 $stow = new_Stow();
 
 make_dir('../stow/pkg5/bin5');
-make_link('bin5', '../not-stow');
+make_invalid_link('bin5', '../not-stow');
 
 $stow->plan_unstow('pkg5');
 %conflicts = $stow->get_conflicts;
@@ -146,11 +146,7 @@ make_file('stow/pkg7a/stow/pkg7b/file7b');
 make_link('stow/pkg7b', '../stow/pkg7a/stow/pkg7b');
 
 $stow->plan_unstow('pkg7b');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg7b'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg7b');
 ok(
     $stow->get_conflict_count == 0 &&
     -l 'stow/pkg7b' &&
@@ -172,11 +168,7 @@ make_file('stow/pkg8a/stow2/pkg8b/file8b');
 make_link('stow2/pkg8b', '../stow/pkg8a/stow2/pkg8b');
 
 $stow->plan_unstow('pkg8a');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg8a'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg8a');
 ok(
     $stow->get_conflict_count == 0 &&
     -l 'stow2/pkg8b' &&
@@ -224,11 +216,7 @@ make_link('man10/man1/file10b.1'  => '../../../stow/pkg10b/man10/man1/file10b.1'
 make_dir('../stow/pkg10c/man10/man1');
 make_file('../stow/pkg10c/man10/man1/file10a.1');
 $stow->plan_unstow('pkg10c');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg10c'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg10c');
 ok( 
     $stow->get_conflict_count == 0 &&
     readlink('man10/man1/file10a.1') eq '../../../stow/pkg10a/man10/man1/file10a.1' 
@@ -260,11 +248,7 @@ ok(
 #
 $stow = new_Stow();
 $stow->plan_unstow('pkg12');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg12'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg12');
 ok(
     $stow->get_conflict_count == 0
     => 'unstow already unstowed package pkg12'
@@ -279,11 +263,7 @@ mkdir("$OUT_DIR/target");
 
 $stow = new_Stow();
 $stow->plan_unstow('pkg12');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg12 which was never stowed'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg12 which was never stowed');
 ok(
     $stow->get_conflict_count == 0
     => 'unstow never stowed package pkg12'
@@ -296,11 +276,7 @@ make_file('man12/man1/file12.1');
 
 $stow = new_Stow();
 $stow->plan_unstow('pkg12');
-stderr_like(
-  sub { $stow->process_tasks(); },
-  qr/There are no outstanding operations to perform/,
-  'no tasks to process when unstowing pkg12 for third time'
-);
+is($stow->get_tasks, 0, 'no tasks to process when unstowing pkg12 for third time');
 %conflicts = $stow->get_conflicts;
 ok(
     $stow->get_conflict_count == 1 &&
@@ -365,8 +341,89 @@ ok(
     => 'unstow a simple tree with absolute stow and target dirs'
 );
 
+#
+# unstow a tree with no-folding enabled -
+# no refolding should take place
+#
+cd("$OUT_DIR/target");
+
+sub create_and_stow_pkg {
+    my ($id, $pkg) = @_;
+
+    my $stow_pkg = "../stow/$id-$pkg";
+    make_dir ($stow_pkg);
+    make_file("$stow_pkg/$id-file-$pkg");
+
+    # create a shallow hierarchy specific to this package and stow
+    # via folding
+    make_dir ("$stow_pkg/$id-$pkg-only-folded");
+    make_file("$stow_pkg/$id-$pkg-only-folded/file-$pkg");
+    make_link("$id-$pkg-only-folded", "$stow_pkg/$id-$pkg-only-folded");
+
+    # create a deeper hierarchy specific to this package and stow
+    # via folding
+    make_dir ("$stow_pkg/$id-$pkg-only-folded2/subdir");
+    make_file("$stow_pkg/$id-$pkg-only-folded2/subdir/file-$pkg");
+    make_link("$id-$pkg-only-folded2",
+              "$stow_pkg/$id-$pkg-only-folded2");
+
+    # create a shallow hierarchy specific to this package and stow
+    # without folding
+    make_dir ("$stow_pkg/$id-$pkg-only-unfolded");
+    make_file("$stow_pkg/$id-$pkg-only-unfolded/file-$pkg");
+    make_dir ("$id-$pkg-only-unfolded");
+    make_link("$id-$pkg-only-unfolded/file-$pkg",
+              "../$stow_pkg/$id-$pkg-only-unfolded/file-$pkg");
+
+    # create a deeper hierarchy specific to this package and stow
+    # without folding
+    make_dir ("$stow_pkg/$id-$pkg-only-unfolded2/subdir");
+    make_file("$stow_pkg/$id-$pkg-only-unfolded2/subdir/file-$pkg");
+    make_dir ("$id-$pkg-only-unfolded2/subdir");
+    make_link("$id-$pkg-only-unfolded2/subdir/file-$pkg",
+              "../../$stow_pkg/$id-$pkg-only-unfolded2/subdir/file-$pkg");
+
+    # create a shallow shared hierarchy which this package uses, and stow
+    # its contents without folding
+    make_dir ("$stow_pkg/$id-shared");
+    make_file("$stow_pkg/$id-shared/file-$pkg");
+    make_dir ("$id-shared");
+    make_link("$id-shared/file-$pkg",
+              "../$stow_pkg/$id-shared/file-$pkg");
+
+    # create a deeper shared hierarchy which this package uses, and stow
+    # its contents without folding
+    make_dir ("$stow_pkg/$id-shared2/subdir");
+    make_file("$stow_pkg/$id-shared2/file-$pkg");
+    make_file("$stow_pkg/$id-shared2/subdir/file-$pkg");
+    make_dir ("$id-shared2/subdir");
+    make_link("$id-shared2/file-$pkg",
+              "../$stow_pkg/$id-shared2/file-$pkg");
+    make_link("$id-shared2/subdir/file-$pkg",
+              "../../$stow_pkg/$id-shared2/subdir/file-$pkg");
+}
+
+foreach my $pkg (qw{a b}) {
+    create_and_stow_pkg('no-folding', $pkg);
+}
+
+$stow = new_Stow('no-folding' => 1);
+$stow->plan_unstow('no-folding-b');
+is_deeply([ $stow->get_conflicts ], [] => 'no conflicts with --no-folding');
+use Data::Dumper;
+#warn Dumper($stow->get_tasks);
+
+$stow->process_tasks();
+
+is_nonexistent_path('no-folding-b-only-folded');
+is_nonexistent_path('no-folding-b-only-folded2');
+is_nonexistent_path('no-folding-b-only-unfolded/file-b');
+is_nonexistent_path('no-folding-b-only-unfolded2/subdir/file-b');
+is_dir_not_symlink('no-folding-shared');
+is_dir_not_symlink('no-folding-shared2');
+is_dir_not_symlink('no-folding-shared2/subdir');
+
 
 # Todo
 #
 # Test cleaning up subdirs with --paranoid option
-

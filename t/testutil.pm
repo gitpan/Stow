@@ -9,7 +9,11 @@ package testutil;
 use strict;
 use warnings;
 
+use Carp qw(croak);
+use File::Basename;
 use File::Path qw(remove_tree);
+use File::Spec;
+use Test::More;
 
 use Stow;
 use Stow::Util qw(parent canon_path);
@@ -20,9 +24,10 @@ our @EXPORT = qw(
     init_test_dirs
     cd
     new_Stow new_compat_Stow
-    make_dir make_link make_file
+    make_dir make_link make_invalid_link make_file
     remove_dir remove_link
     cat_file
+    is_link is_dir_not_symlink is_nonexistent_path
 );
 
 our $OUT_DIR = 'tmp-testing-trees';
@@ -56,28 +61,50 @@ sub new_compat_Stow {
 # Purpose   : safely create a link
 # Parameters: $target => path to the link
 #           : $source => where the new link should point
+#           : $invalid => true iff $source refers to non-existent file
 # Returns   : n/a
 # Throws    : fatal error if the link can not be safely created
 # Comments  : checks for existing nodes
 #============================================================================
 sub make_link {
-    my ($target, $source) = @_;
+    my ($target, $source, $invalid) = @_;
 
     if (-l $target) {
         my $old_source = readlink join('/', parent($target), $source) 
-            or die "could not read link $target/$source";
+            or die "$target is already a link but could not read link $target/$source";
         if ($old_source ne $source) {
             die "$target already exists but points elsewhere\n";
         }
     }
-    elsif (-e $target) {
-        die "$target already exists and is not a link\n";
+    die "$target already exists and is not a link\n" if -e $target;
+    my $abs_target = File::Spec->rel2abs($target);
+    my $target_container = dirname($abs_target);
+    my $abs_source = File::Spec->rel2abs($source, $target_container);
+    #warn "t $target c $target_container as $abs_source";
+    if (-e $abs_source) {
+        croak "Won't make invalid link pointing to existing $abs_target"
+            if $invalid;
     }
     else {
-        symlink $source, $target
-            or die "could not create link $target => $source ($!)\n";
+        croak "Won't make link pointing to non-existent $abs_target"
+            unless $invalid;
     }
-    return;
+    symlink $source, $target
+        or die "could not create link $target => $source ($!)\n";
+}
+
+#===== SUBROUTINE ===========================================================
+# Name      : make_invalid_link()
+# Purpose   : safely create an invalid link
+# Parameters: $target => path to the link
+#           : $source => the non-existent source where the new link should point
+# Returns   : n/a
+# Throws    : fatal error if the link can not be safely created
+# Comments  : checks for existing nodes
+#============================================================================
+sub make_invalid_link {
+    my ($target, $source, $allow_invalid) = @_;
+    make_link($target, $source, 1);
 }
 
 #===== SUBROUTINE ===========================================================
@@ -228,6 +255,41 @@ sub cat_file {
     close(F);
     return $contents;
 }
+
+#===== SUBROUTINE ===========================================================
+# Name      : is_link()
+# Purpose   : assert path is a symlink
+# Parameters: $path => path to check
+#           : $dest => target symlink should point to
+#============================================================================
+sub is_link {
+    my ($path, $dest) = @_;
+    ok(-l $path => "$path should be symlink");
+    is(readlink $path, $dest => "$path symlinks to $dest");
+}
+
+#===== SUBROUTINE ===========================================================
+# Name      : is_dir_not_symlink()
+# Purpose   : assert path is a directory not a symlink
+# Parameters: $path => path to check
+#============================================================================
+sub is_dir_not_symlink {
+    my ($path) = @_;
+    ok(! -l $path => "$path should not be symlink");
+    ok(-d _       => "$path should be a directory");
+}
+
+#===== SUBROUTINE ===========================================================
+# Name      : is_nonexistent_path()
+# Purpose   : assert path does not exist
+# Parameters: $path => path to check
+#============================================================================
+sub is_nonexistent_path {
+    my ($path) = @_;
+    ok(! -l $path => "$path should not be symlink");
+    ok(! -e _     => "$path should not exist");
+}
+
 
 1;
 

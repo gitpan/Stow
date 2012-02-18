@@ -17,8 +17,7 @@
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 =head1 NAME
 
@@ -181,8 +180,6 @@ Restow packages (first unstow, then stow again). This is useful
 for pruning obsolete symlinks from the target tree after updating
 the software in a package.
 
-=item -a
-
 =item --adopt
 
 B<Warning!>  This behaviour is specifically intended to alter the
@@ -197,6 +194,11 @@ same relative place within the package's installation image within the
 stow directory, and then stowing proceeds as before.  So effectively,
 the file becomes adopted by the stow package, without its contents
 changing.
+
+=item --no-folding
+
+Disable folding of newly stowed directories when stowing, and
+refolding of newly foldable directories when unstowing.
 
 =item --ignore=REGEX
 
@@ -479,7 +481,7 @@ sub process_options {
         \%options,
         'verbose|v:+', 'help|h', 'simulate|n|no',
         'version|V', 'compat|p', 'dir|d=s', 'target|t=s',
-        'adopt|a',
+        'adopt', 'no-folding',
 
         # clean and pre-compile any regex's at parse time
         'ignore=s' =>
@@ -620,22 +622,25 @@ SYNOPSIS:
 
 OPTIONS:
 
-    -n, --no              Do not actually make any filesystem changes
     -d DIR, --dir=DIR     Set stow dir to DIR (default is current dir)
     -t DIR, --target=DIR  Set target to DIR (default is parent of stow dir)
-    -v, --verbose[=N]     Increase verbosity (levels are 0,1,2,3;
-                            -v or --verbose adds 1; --verbose=N sets level)
 
     -S, --stow            Stow the package names that follow this option
     -D, --delete          Unstow the package names that follow this option
     -R, --restow          Restow (like stow -D followed by stow -S)
-    -p, --compat          Use legacy algorithm for unstowing
 
     --ignore=REGEX        Ignore files ending in this Perl regex
     --defer=REGEX         Don't stow files beginning with this Perl regex
                           if the file is already stowed to another package
     --override=REGEX      Force stowing files beginning with this Perl regex
                           if the file is already stowed to another package
+    --adopt               (Use with care!)  Import existing files into stow package
+                          from target.  Please read docs before using.
+    -p, --compat          Use legacy algorithm for unstowing
+
+    -n, --no, --simulate  Do not actually make any filesystem changes
+    -v, --verbose[=N]     Increase verbosity (levels are 0,1,2,3;
+                            -v or --verbose adds 1; --verbose=N sets level)
     -V, --version         Show stow version number
     -h, --help            Show this help
 

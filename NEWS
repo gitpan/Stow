@@ -1,5 +1,37 @@
 News file for Stow.
 
+* Changes in version 2.2.0
+
+** New --no-folding option
+
+   Disables folding of newly stowed directories when stowing, and
+   refolding of newly foldable directories when unstowing.
+
+** Remove -a option (--adopt still available)
+
+   As --adopt is the only option which allows stow to modify files, it
+   is considered potentially dangerous (especially for stow package
+   directories which are not managed by a version control system).
+   Therefore it seems prudent to require a bit more effort from the
+   user to enable this option, minimising the change of enabling it
+   via a typo.
+
+** Improve error message when stow package is not found.
+
+   The error message displayed a path to the missing stow package
+   which was relative to the target directory rather than the cwd,
+   which was confusing for the user.
+
+** Test suite improvements
+
+   The test suite has been tightened up slightly.
+
+** Documentation improvements
+
+   Various fixes and cosmetic improvements have been made in the manual.
+
+** Remove "There are no outstanding operations to perform" warning.
+
 * Changes in version 2.1.3
 
 ** New --adopt / -a option
@@ -9,7 +41,7 @@ News file for Stow.
 
 ** ./configure now checks for Perl modules required by the test suite.
 
-* Changes in version 2.1.3
+* Changes in version 2.1.2
 
   Many thanks to Stefano Lattarini for help with numerous autoconf and
   automake issues which are addressed in this release.
